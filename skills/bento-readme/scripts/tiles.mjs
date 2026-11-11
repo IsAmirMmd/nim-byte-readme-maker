@@ -60,7 +60,7 @@ const chips = (items = [], tone = "") => `<div class="chips">${items.map((c) => 
 const label = (text, dot = true) => (text ? `<div class="label">${dot ? "<i></i>" : ""}${esc(text)}</div>` : "");
 
 // Pictures as the editor crops them: fit (cover or contain), pos ("x% y%", the focal point), zoom
-// (1 to 3, toward pos) and mask (rounded, square, circle, arch). A picture with none of these
+// (0.05 to 2, from pos: below 1 shrinks the picture in its frame) and mask (rounded, square, circle, arch). A picture with none of these
 // draws exactly as before. A caption sits below it, or in a corner with capPos.
 const CORNERS = ["top-right", "top-left", "bottom-right", "bottom-left"];
 const edited = (p) => Boolean(p.fit || p.pos || p.zoom || p.mask);

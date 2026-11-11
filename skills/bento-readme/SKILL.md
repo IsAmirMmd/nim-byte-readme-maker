@@ -96,7 +96,7 @@ override either. Keep one accent; see the design rules.
 `tone` (every tile but `stack`, `experience`, `photo` and the stats): `paper`, `sand`, `accent-soft`, `accent`, `accent-ink`, `ink`, `blue`, `green`, or any colour as `#rrggbb`. Dark tones get light text and, like `now`, a variant for GitHub's dark theme.
 
 Pictures (`image`, `projects[]`, `photo` blocks) also take the editor's crop: `fit` (`cover` or
-`contain`), `pos` (`"x% y%"`, the focal point), `zoom` (1 to 3, toward `pos`) and `mask` (`rounded`,
+`contain`), `pos` (`"x% y%"`, the focal point), `zoom` (0.05 to 2, 1 being the picture's own size: below 1 shrinks it in its frame, above 1 enlarges it toward `pos`) and `mask` (`rounded`,
 `square`, `circle`, `arch`). Their `caption` sits below the picture, or in a corner with `capPos`:
 `top-right`, `top-left`, `bottom-right`, `bottom-left`. Without these keys a picture draws as before.
 
