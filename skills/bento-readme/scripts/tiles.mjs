@@ -18,27 +18,34 @@ export const PALETTES = {
   red: ["#f6e9e7", "#f8d3d0", "#e5484d", "#a3262b", "#2b1a1a"],
   neutral: ["#edeae5", "#e0dcd5", "#8a847c", "#55504a", "#1f1e1c"],
   green: ["#e6f1e9", "#cde9d6", "#2f9e5c", "#17663a", "#14261b"],
-  yellow: ["#f5efdc", "#f6e6a6", "#e8b10f", "#8a6300", "#2b2512"],
-  orange: ["#f6ebe1", "#fbd9bd", "#f5761a", "#b14a0b", "#2d1c10"],
+  yellow: ["#f5efdc", "#f6e6a6", "#e8b10f", "#735200", "#2b2512"],
+  orange: ["#f6ebe1", "#fbd9bd", "#f5761a", "#a3430a", "#2d1c10"],
   mono: ["#ececec", "#dcdcdc", "#5f5f5f", "#2e2e2e", "#0d0d0d"],
   pink: ["#f6e9ef", "#f8d2e3", "#e8559a", "#a52463", "#2e1622"],
 };
 const ROLES = ["sand", "accentSoft", "accent", "accentInk", "ink"];
-// The theme for a profile: nimbyte's, then a palette's five shades, then single overrides.
-export function themeOf(theme = {}) {
-  const { palette, colors, ...rest } = theme;
-  const five = colors?.length === 5 ? colors : PALETTES[palette];
-  const shades = five ? Object.fromEntries(ROLES.map((r, k) => [r, five[k]])) : {};
-  return { ...THEMES.nimbyte, ...shades, ...rest };
-}
-
-// A tile's tone: one of the palette's names (paper, sand, accent-soft, accent, accent-ink, ink,
-// blue, green) or any colour as #rrggbb. Dark ones get light text (and a dark-theme variant).
 const HEX = /^#[0-9a-f]{6}$/i;
 const light = (hex) => {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 };
+// The last two shades are text and dark tiles, so they stay dark: darker, if need be, to `max`.
+const MAX = { accentInk: 0.35, ink: 0.18 };
+export function deepen(hex, max) {
+  const l = light(hex);
+  if (l <= max) return hex;
+  return `#${[1, 3, 5].map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * (max / l)).toString(16).padStart(2, "0")).join("")}`;
+}
+// The theme for a profile: nimbyte's, then a palette's five shades, then single overrides.
+export function themeOf(theme = {}) {
+  const { palette, colors, ...rest } = theme;
+  const five = colors?.length === 5 ? colors : PALETTES[palette];
+  const shades = five ? Object.fromEntries(ROLES.map((r, k) => [r, MAX[r] ? deepen(five[k], MAX[r]) : five[k]])) : {};
+  return { ...THEMES.nimbyte, ...shades, ...rest };
+}
+
+// A tile's tone: one of the palette's names (paper, sand, accent-soft, accent, accent-ink, ink,
+// blue, green) or any colour as #rrggbb. Dark ones get light text (and a dark-theme variant).
 export const isDark = (tone) => tone === "ink" || tone === "accent-ink" || (HEX.test(tone ?? "") && light(tone) < 0.5);
 const box = (tone, def, style = "", extra = "") => {
   const t = tone ?? def;
@@ -103,6 +110,12 @@ export const TILES = {
   contact: (p) => `<div ${box(p.tone, "paper", "padding:20px", "raised")}>${label(p.label, false)}<div class="grow"></div>
     <div class="mono value" style="font-size:${p.value.length > 20 ? 12.5 : 15}px">${esc(p.value)}</div></div>`,
 };
+
+// The first three shades are grounds for ink text; one dark enough gets light text instead.
+const GROUNDS = { sand: [".sand", ".chip.sand"], accentSoft: [".accent-soft"], accent: [".accent"] };
+const onDark = (t) => Object.entries(GROUNDS).filter(([k]) => light(t[k]) < 0.4).flatMap(([, sel]) => sel).map((c) =>
+  `\n${c} { color: var(--cream); } ${c} .label, ${c} .when, ${c} .unit { color: rgba(255,255,255,.64); }
+${c} .small, ${c} .lead, ${c} .link-row .mono { color: rgba(255,255,255,.72); } ${c} .chip { color: var(--ink); }`).join("");
 
 export function css(t, fonts) {
   return `
@@ -169,5 +182,5 @@ h2 { font-size: 25px; line-height: 1.3; font-weight: 800; } h3 { font-size: 19px
 .link-row { justify-content: space-between; font-size: 15px; font-weight: 600; border-bottom: 1px solid var(--sand); padding-bottom: 8px; }
 .link-row:last-child { border-bottom: 0; padding-bottom: 0; } .link-row .mono { font-size: 13px; color: var(--muted); direction: ltr; }
 .l0 { background: var(--sand); } .l1 { background: var(--accent-soft); } .l2 { background: color-mix(in srgb, var(--accent) 55%, white); }
-.l3 { background: var(--accent); } .l4 { background: var(--accent-ink); }`;
+.l3 { background: var(--accent); } .l4 { background: var(--accent-ink); }${onDark(t)}`;
 }

@@ -68,7 +68,7 @@ after a copy is saved to `.bento/README.before-bento.md`.
 Edit `.bento/profile.json` (or ask the agent to), build, preview, push. To change the colours,
 add a `"theme"` object: `"palette"` names a ready one (`nimbyte`, the default, `purple`, `blue`,
 `red`, `neutral`, `green`, `yellow`, `orange`, `mono`, `pink`), or `"colors"` gives your own five
-shades, light to dark (they take the places of sand, accentSoft, accent, accentInk and ink);
+shades, light to dark (they take the places of sand, accentSoft, accent, accentInk and ink; the first three are grounds, and one dark enough gets light text; the last two are text and dark tiles, so they're darkened if they're too light);
 single keys (ink, muted, cream, sand, paper, accent, accentInk, accentSoft, blueSoft, greenSoft)
 override either. Keep one accent; see the design rules.
 
