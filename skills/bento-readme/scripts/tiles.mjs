@@ -13,13 +13,22 @@ const esc = (s = "") => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").r
 const chips = (items = [], tone = "") => `<div class="chips">${items.map((c) => `<span class="chip ${tone}">${esc(c)}</span>`).join("")}</div>`;
 const label = (text, dot = true) => (text ? `<div class="label">${dot ? "<i></i>" : ""}${esc(text)}</div>` : "");
 
+// Pictures as the editor crops them: fit (cover or contain), pos ("x% y%", the focal point), zoom
+// (1 to 3, toward pos) and mask (rounded, square, circle, arch). A picture with none of these
+// draws exactly as before. A caption sits below it, or in a corner with capPos.
+const CORNERS = ["top-right", "top-left", "bottom-right", "bottom-left"];
+const edited = (p) => Boolean(p.fit || p.pos || p.zoom || p.mask);
+const crop = (p, fit) => `object-fit:${p.fit ?? fit};object-position:${p.pos ?? "50% 50%"};transform:scale(${p.zoom ?? 1});transform-origin:${p.pos ?? "50% 50%"}`;
+const frame = (src, p, cls, fit) => `<div class="frame ${cls} mask-${p.mask ?? "rounded"}"><img src="${esc(src)}" style="${crop(p, fit)}"></div>`;
+const corner = (p) => (p.caption && CORNERS.includes(p.capPos) ? `<span class="cap-chip ${p.capPos}">${esc(p.caption)}</span>` : "");
+
 export const TILES = {
   hero: (p) => `<div class="tile paper">${label(p.label)}<div class="grow"></div>
     <h1>${esc(p.title)}</h1>${p.lead ? `<p class="lead">${esc(p.lead)}</p>` : ""}
     ${p.chips?.length ? `<div style="margin-top:18px">${chips(p.chips, "sand")}</div>` : ""}</div>`,
   image: (p) => `<div class="tile ${p.tone ?? "accent-soft"}" style="align-items:center">
-    <img class="picture" src="${esc(p.src)}"><div class="grow"></div>
-    ${p.caption ? `<p class="small" style="color:var(--ink)">${esc(p.caption)}</p>` : ""}</div>`,
+    ${edited(p) ? frame(p.src, p, "pic", "contain") : `<img class="picture" src="${esc(p.src)}">`}<div class="grow"></div>
+    ${corner(p) || (p.caption ? `<p class="small" style="color:var(--ink)">${esc(p.caption)}</p>` : "")}</div>`,
   now: (p) => `<div class="tile ink">${label(p.label)}<h2 style="margin-top:12px">${esc(p.title)}</h2>
     ${p.meta ? `<p class="small" style="margin-top:2px">${esc(p.meta)}</p>` : ""}<div class="grow"></div>
     ${p.text ? `<p class="small" style="margin-top:14px">${esc(p.text)}</p>` : ""}</div>`,
@@ -30,7 +39,7 @@ export const TILES = {
   stack: (groups, t) => `<div class="tile sand">${label(t.label ?? "Stack")}<div class="grow"></div><div class="rows">
     ${groups.map((g) => `<div class="row"><span class="when">${esc(g.group)}</span>${chips(g.items, "tight")}</div>`).join("")}</div></div>`,
   project: (p) => `<div class="tile paper raised" style="padding:12px 12px 18px">
-    ${p.image ? `<img class="shot" src="${esc(p.image)}">` : ""}<div style="padding:14px 8px 0">
+    ${p.image ? (edited(p) ? frame(p.image, p, "shot-frame", "cover") : `<img class="shot" src="${esc(p.image)}">`) : ""}<div style="padding:14px 8px 0">
     <h3>${esc(p.title)}</h3>${p.text ? `<p class="small">${esc(p.text)}</p>` : ""}</div></div>`,
   experience: (list, t) => `<div class="tile paper">${label(t.label ?? "Experience")}<div class="grow"></div><div class="rows">
     ${list.map((e) => `<div class="row"><span class="when">${esc(e.when)}</span><span><b>${esc(e.role)}</b>
@@ -48,7 +57,8 @@ export const TILES = {
     <div class="big-num">${esc(p.value)}</div>${p.text ? `<p class="small">${esc(p.text)}</p>` : ""}</div>`,
   status: (p) => `<div class="tile ${p.tone ?? "green"}">${label(p.label, false)}<div class="grow"></div>
     <div class="status"><i></i><b>${esc(p.title)}</b></div>${p.text ? `<p class="small" style="margin-top:4px">${esc(p.text)}</p>` : ""}</div>`,
-  photo: (p) => `<div class="tile photo">${p.src ? `<img src="${esc(p.src)}">` : ""}${p.caption ? `<span class="photo-cap">${esc(p.caption)}</span>` : ""}</div>`,
+  photo: (p) => `<div class="tile photo">${p.src ? `<img src="${esc(p.src)}"${edited(p) ? ` style="${crop(p, "cover")}"` : ""}>` : ""}
+    ${corner(p) || (p.caption ? `<span class="photo-cap">${esc(p.caption)}</span>` : "")}</div>`,
   links: (p) => `<div class="tile ${p.tone ?? "paper"}">${label(p.label)}<div class="grow"></div><div class="rows">
     ${(p.items ?? []).map((i) => `<div class="row link-row"><span>${esc(i.name)}</span><span class="mono">${esc(i.value)}</span></div>`).join("")}</div></div>`,
   contact: (p) => `<div class="tile paper raised" style="padding:20px">${label(p.label, false)}<div class="grow"></div>
@@ -95,6 +105,14 @@ h2 { font-size: 25px; line-height: 1.3; font-weight: 800; } h3 { font-size: 19px
 .feature-title .sub { font-size: 18px; font-weight: 800; padding-bottom: 12px; }
 .picture { max-height: 230px; max-width: 100%; object-fit: contain; margin-top: 4px; border-radius: 16px; }
 .shot { width: 100%; aspect-ratio: 1200 / 560; object-fit: cover; border-radius: 16px; display: block; }
+.frame { position: relative; overflow: hidden; } .frame img { width: 100%; height: 100%; display: block; }
+.frame.pic { width: 100%; flex: 1; min-height: 150px; max-height: 260px; margin-top: 4px; } .frame.shot-frame { width: 100%; aspect-ratio: 1200 / 560; }
+.mask-rounded { border-radius: 16px; } .mask-square { border-radius: 0; } .mask-arch { border-radius: 999px 999px 16px 16px; }
+.mask-circle { border-radius: 50%; } .frame.pic.mask-circle { flex: none; width: auto; height: 230px; aspect-ratio: 1; align-self: center; }
+.frame.pic.mask-arch { flex: none; width: auto; height: 240px; aspect-ratio: 4 / 5; align-self: center; }
+.cap-chip { position: absolute; z-index: 2; background: var(--paper); color: var(--ink); border-radius: 12px; padding: 6px 12px; font-size: 14px; font-weight: 700; }
+.cap-chip.top-right { top: 16px; right: 16px; } .cap-chip.top-left { top: 16px; left: 16px; }
+.cap-chip.bottom-right { bottom: 16px; right: 16px; } .cap-chip.bottom-left { bottom: 16px; left: 16px; }
 .value { font-weight: 800; direction: ltr; text-align: start; } [dir=rtl] .value { text-align: right; }
 .num { font-size: 34px; font-weight: 900; line-height: 1.2; letter-spacing: -.5px; }
 .unit { font-size: 16px; font-weight: 700; color: var(--muted); letter-spacing: 0; }

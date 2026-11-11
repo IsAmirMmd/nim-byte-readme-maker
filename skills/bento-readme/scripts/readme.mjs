@@ -22,11 +22,13 @@ const altOf = (t) => {
 };
 
 export function bentoBlock({ rows, dir, folder, statRows, statsFolder, github }) {
-  const line = (tiles, base) => (dir === "rtl" ? [...tiles].reverse() : tiles).map((t) => img(t, `${base}/${t.id}.png`, altOf(t))).join("");
-  const body = rows.map((r) => line(r.tiles, folder));
-  if (statRows) body.push(...statRows.map((r) => line(r.tiles, statsFolder)));
+  // a stats tile's picture is in the stats folder, which the workflow redraws
+  const base = (t) => (t.kind === "stat" || t.kind === "year" ? statsFolder : folder);
+  const line = (tiles) => (dir === "rtl" ? [...tiles].reverse() : tiles).map((t) => img(t, `${base(t)}/${t.id}.png`, altOf(t))).join("");
+  const body = rows.map((r) => line(r.tiles));
+  if (statRows) body.push(...statRows.map((r) => line(r.tiles)));
   let html = `${START}\n<!-- Made with bento-readme: tiles in ${folder}/, drawn from .bento/profile.json by .bento/scripts/build.mjs. -->\n<p align="center">${body.join("<br/>")}</p>\n`;
-  if (statRows && github) html += `<!-- komarev counts the views; the number is drawn on a tile above. -->\n<img src="https://komarev.com/ghpvc/?username=${github}" width="1" height="1" alt=""/>\n`;
+  if ((statRows || rows.some((r) => r.tiles.some((t) => t.kind === "stat"))) && github) html += `<!-- komarev counts the views; the number is drawn on a tile above. -->\n<img src="https://komarev.com/ghpvc/?username=${github}" width="1" height="1" alt=""/>\n`;
   return `${html}${END}`;
 }
 

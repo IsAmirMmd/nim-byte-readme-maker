@@ -91,3 +91,11 @@ accentSoft, blueSoft, greenSoft. Keep one accent; see the design rules.
 | `theme` | colour overrides |
 
 `tone` (image and note tiles): `accent-soft`, `blue`, `green`, `sand`, `paper`.
+
+Pictures (`image`, `projects[]`, `photo` blocks) also take the editor's crop: `fit` (`cover` or
+`contain`), `pos` (`"x% y%"`, the focal point), `zoom` (1 to 3, toward `pos`) and `mask` (`rounded`,
+`square`, `circle`, `arch`). Their `caption` sits below the picture, or in a corner with `capPos`:
+`top-right`, `top-left`, `bottom-right`, `bottom-left`. Without these keys a picture draws as before.
+
+Stats tiles can go anywhere: put `stat-total`, `stat-current`, `stat-longest`, `stat-views` and
+`stat-year` in `layout` rows like any other id. Without them in the layout, the stats rows come last.

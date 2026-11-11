@@ -9,7 +9,7 @@ import { createRequire } from "node:module";
 import { dirname, join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { TILES, THEMES, css } from "./tiles.mjs";
-import { rows as layout, statRows, dirOf, langOf } from "./layout.mjs";
+import { rows as layout, statRows, dirOf, langOf, isStat, statsPlaced } from "./layout.mjs";
 import { statTile, yearTile } from "./stat-tiles.mjs";
 import { bentoBlock, writeReadme } from "./readme.mjs";
 
@@ -37,12 +37,15 @@ function playwright() {
   throw new Error("Playwright isn't installed: run `npm i --no-save playwright && npx playwright install chromium` in the repo");
 }
 
-const tileHtml = (t) => (t.kind === "stat" ? statTile(t.data, stats, lang) : t.kind === "year" ? yearTile(t.data, stats, lang) : TILES[t.kind](t.data, t));
+// stats tiles placed among others are drawn with zeros when only the others' heights need them
+const ZERO = { total: 0, since: new Date().toISOString().slice(0, 10), current: { length: 0 }, longest: { length: 0 }, views: 0, lastYear: [0] };
+const tileHtml = (t) => (t.kind === "stat" ? statTile(t.data, stats ?? ZERO, lang) : t.kind === "year" ? yearTile(t.data, stats ?? ZERO, lang) : TILES[t.kind](t.data, t));
 const page = (rowList) => `<!doctype html><html lang="${lang}" dir="${dir}"><head><meta charset="utf-8"><style>${css(theme, "../fonts")}</style></head><body>
 ${rowList.map((r) => `<div class="row-box">${r.tiles.map((t) => `<div class="wrap" id="${t.id}" style="width:${t.width}px;min-height:${r.minHeight ?? 0}px">${tileHtml(t)}</div>`).join("")}</div>`).join("\n")}
 </body></html>`;
 
-async function render(rowList, out) {
+// Draws the rows (so a row's tiles share a height) and screenshots the tiles `pick` keeps.
+async function render(rowList, out, pick = () => true) {
   mkdirSync(join(bento, "build"), { recursive: true });
   const file = join(bento, "build", "tiles.html");
   writeFileSync(file, page(rowList));
@@ -60,7 +63,7 @@ async function render(rowList, out) {
       for (const w of row.children) w.style.height = `${h}px`;
     }
   });
-  for (const r of rowList) for (const t of r.tiles) {
+  for (const r of rowList) for (const t of r.tiles.filter(pick)) {
     await tab.locator(`#${t.id}`).screenshot({ path: join(out, `${t.id}.png`), omitBackground: true });
     if (t.ink) {
       // GitHub's dark theme: an ink tile gets a faint edge so it doesn't sink into the page
@@ -73,20 +76,24 @@ async function render(rowList, out) {
 
 const assets = join(repo, "assets", "bento");
 const statsFolder = join(assets, "stats");
-const stat = stats ? statRows(profile) : null;
-if (stats) await render(stat, statsFolder);
+const main = layout(profile);
+const placed = statsPlaced(profile);
+// stats tiles: in the rows the layout puts them in, or (without stat ids in the layout) at the end
+const stat = stats && !placed ? statRows(profile) : null;
+if (stats) await render(placed ? main.filter((r) => r.tiles.some(isStat)) : stat, statsFolder, placed ? isStat : () => true);
 
 const versions = existsSync(assets) ? readdirSync(assets).filter((d) => /^v\d+$/.test(d)).map((d) => Number(d.slice(1))) : [];
-const main = layout(profile);
 let folder = versions.length ? join(assets, `v${Math.max(...versions)}`) : null;
 if (!statsOnly) {
   folder = join(assets, `v${Math.max(0, ...versions) + 1}`);
-  await render(main, folder);
+  await render(main, folder, (t) => !isStat(t));
   for (const v of versions) rmSync(join(assets, `v${v}`), { recursive: true });
 }
+// until the workflow has drawn them, placed stats tiles stay out of the README
+const shown = stats ? main : main.map((r) => ({ ...r, tiles: r.tiles.filter((t) => !isStat(t)) })).filter((r) => r.tiles.length);
 // --stats keeps the drawn tiles and only rewrites the README block, so the stats row joins it
 if (folder && !args.includes("--no-readme")) {
-  const block = bentoBlock({ rows: main, dir, folder: relative(repo, folder), statRows: stat, statsFolder: relative(repo, statsFolder), github: profile.github });
+  const block = bentoBlock({ rows: shown, dir, folder: relative(repo, folder), statRows: stat, statsFolder: relative(repo, statsFolder), github: profile.github });
   writeReadme(join(repo, "README.md"), block, join(bento, "README.before-bento.md"));
 }
 console.log(`${statsOnly ? "stats tiles" : "tiles"}: ${folder ? relative(repo, folder) : "-"}${stats ? ` and ${relative(repo, statsFolder)}` : ""}; README.md updated`);

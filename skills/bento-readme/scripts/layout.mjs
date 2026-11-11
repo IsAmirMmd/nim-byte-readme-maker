@@ -68,7 +68,7 @@ const noteTiles = (profile) => [
   ...(profile.blocks ?? []).filter((b) => BLOCKS.includes(b.type)).map((b, k) => ({ id: `block-${k + 1}`, kind: b.type, data: b, href: b.href })),
 ];
 export const BLOCKS = ["quote", "chips", "number", "status", "photo", "links"];
-const MIN = { hero: 300, image: 300, now: 230, feature: 230, contact: 116, photo: 230, quote: 200, number: 180, status: 160 };
+const MIN = { hero: 300, image: 300, now: 230, feature: 230, contact: 116, photo: 230, quote: 200, number: 180, status: 160, stat: 150, year: 200 };
 
 // Widths that add up to 1000: the ones given keep their share, the rest split what's left.
 export function fit(widths) {
@@ -88,7 +88,9 @@ export function rows(profile) {
   const defaults = defaultRows(profile);
   const notes = noteTiles(profile);
   if (!profile.layout?.length) return notes.length ? [...defaults, { tiles: notes.map((t, k, a) => ({ ...t, width: fit(a.map(() => 0))[k] })) }] : defaults;
-  const byId = new Map([...defaults.flatMap((r) => r.tiles), ...notes].map((t) => [t.id, t]));
+  // stats tiles (stat-total, stat-current, stat-longest, stat-views, stat-year) can sit in any row too
+  const stats = profile.stats === false ? [] : statRows(profile).flatMap((r) => r.tiles);
+  const byId = new Map([...defaults.flatMap((r) => r.tiles), ...notes, ...stats].map((t) => [t.id, t]));
   return profile.layout.map((row) => {
     const entries = row.map((e) => (typeof e === "string" ? { id: e } : e)).filter((e) => byId.has(e.id));
     const widths = fit(entries.map((e) => e.width ?? 0));
@@ -96,6 +98,9 @@ export function rows(profile) {
     return { tiles, minHeight: Math.max(0, ...tiles.map((t) => MIN[t.kind] ?? 0)) };
   }).filter((r) => r.tiles.length);
 }
+
+export const isStat = (t) => t.kind === "stat" || t.kind === "year";
+export const statsPlaced = (profile) => Boolean(profile.layout?.some((r) => r.some((e) => String(e.id ?? e).startsWith("stat-"))));
 
 // The stats tiles (stats.mjs fills them): four counters, then the last year's squares.
 export const statRows = (profile) => {
