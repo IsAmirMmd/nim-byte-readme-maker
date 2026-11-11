@@ -1,0 +1,35 @@
+# Redraws the README's stats tiles (contributions, streaks, profile views, the last year) from
+# fresh numbers every six hours, after each change to .bento/profile.json, and on demand from the
+# Actions tab. Made by bento-readme.
+name: Bento stats
+on:
+  push:
+    paths: [".bento/profile.json"]
+  schedule:
+    - cron: "41 */6 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: bento-stats
+jobs:
+  draw:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-save --no-package-lock playwright@1.55.0
+      - run: npx playwright install --with-deps chromium
+      - run: node .bento/scripts/stats.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: node .bento/scripts/build.mjs --stats
+      - name: Commit the new tiles
+        run: |
+          git add .bento/stats.json assets/bento/stats README.md
+          git diff --cached --quiet && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Bento stats: fresh numbers"
+          git push
