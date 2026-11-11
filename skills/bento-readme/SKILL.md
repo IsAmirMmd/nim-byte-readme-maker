@@ -89,7 +89,7 @@ override either. Keep one accent; see the design rules.
 | `education` | `title`, `text`, `chips[]`, `label` |
 | `contacts` | `[{ label, value, href }]`: up to five, one row |
 | `notes` | `[{ label, title, text, tone, href }]`: free tiles of text (ids `note-1`, `note-2`, …) |
-| `blocks` | `[{ type, … }]`: extra tiles (ids `block-1`, `block-2`, …), `type` one of: `quote` (text, author), `chips` (label, items[]), `number` (label, value, text), `status` (label, title, text), `photo` (src, caption: an image filling the tile), `links` (label, items[{name, value}]); each takes `tone` and `href` |
+| `blocks` | `[{ type, … }]`: extra tiles (ids `block-1`, `block-2`, …), `type` one of: `quote` (text, author), `chips` (label, items[]), `number` (label, value, text), `status` (label, title, text), `photo` (src, caption: an image filling the tile), `links` (label, items[{name, value}]), `music` (label, title, artist, cover, duration in seconds, source: a song, filled from a Spotify or SoundCloud link), `repo` (label, repo as owner/name, description, language, color, stars, forks), `video` (title, channel, thumb: a YouTube video), `progress` (label, items[{name, value 0–100}]); each takes `tone` and `href` |
 | `layout` | the order and widths: rows of tile ids, each a string or `{ id, width }` (widths on a 1000 scale; missing ones share what's left). Ids: `hero`, `image`, `now`, `feature`, `stack`, `work-N`, `experience`, `education`, `contact-N`, `note-N`, `block-N`. Without it, the default order. The editor site writes it |
 | `theme` | `palette` (a ready one), `colors` (your five shades) and single colour overrides |
 
@@ -102,3 +102,13 @@ Pictures (`image`, `projects[]`, `photo` blocks) also take the editor's crop: `f
 
 Stats tiles can go anywhere: put `stat-total`, `stat-current`, `stat-longest`, `stat-views` and
 `stat-year` in `layout` rows like any other id. Without them in the layout, the stats rows come last.
+
+### Filling the link tiles
+
+The editor site fills `music`, `repo` and `video` from a link. Without it, fill them yourself:
+for a Spotify track, its page's `og:title`, `music:musician_description`, `music:duration` and
+`og:image`; for SoundCloud, `https://soundcloud.com/oembed?format=json&url=<link>` (title and
+artist, `thumbnail_url`) and the page's `itemprop="duration"`; for a repository, the GitHub API
+(`/repos/<owner>/<name>`: description, language, stargazers_count, forks_count); for YouTube,
+`https://www.youtube.com/oembed?format=json&url=<link>` and `https://i.ytimg.com/vi/<id>/hqdefault.jpg`.
+Set `href` to the link. Remote covers and thumbnails are fine as URLs: build.mjs loads them.

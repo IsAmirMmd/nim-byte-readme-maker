@@ -69,8 +69,8 @@ const noteTiles = (profile) => [
   // profile.blocks: tiles of any of the extra kinds, each with its "type"
   ...(profile.blocks ?? []).filter((b) => BLOCKS.includes(b.type)).map((b, k) => ({ id: `block-${k + 1}`, kind: b.type, data: b, href: b.href })),
 ];
-export const BLOCKS = ["quote", "chips", "number", "status", "photo", "links"];
-const MIN = { hero: 300, image: 300, now: 230, feature: 230, contact: 116, photo: 230, quote: 200, number: 180, status: 160, stat: 150, year: 200 };
+export const BLOCKS = ["quote", "chips", "number", "status", "photo", "links", "music", "repo", "video", "progress"];
+const MIN = { hero: 300, image: 300, now: 230, feature: 230, contact: 116, photo: 230, quote: 200, number: 180, status: 160, stat: 150, year: 200, music: 200, repo: 180, video: 230, progress: 160 };
 
 // Widths that add up to 1000: the ones given keep their share, the rest split what's left.
 export function fit(widths) {

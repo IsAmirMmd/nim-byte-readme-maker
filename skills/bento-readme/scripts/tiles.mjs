@@ -68,6 +68,14 @@ const crop = (p, fit) => `object-fit:${p.fit ?? fit};object-position:${p.pos ?? 
 const frame = (src, p, cls, fit) => `<div class="frame ${cls} mask-${p.mask ?? "rounded"}"><img src="${esc(src)}" style="${crop(p, fit)}"></div>`;
 const corner = (p) => (p.caption && CORNERS.includes(p.capPos) ? `<span class="cap-chip ${p.capPos}">${esc(p.caption)}</span>` : "");
 
+const clock = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}`;
+const count = (n) => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, "")}k` : String(n));
+const pct = (v) => Math.max(0, Math.min(100, Math.round(Number(v) || 0)));
+const icon = (d, w = 16) => `<svg width="${w}" height="${w}" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="${d}"/></svg>`;
+const STAR = icon("M8 .8l2.2 4.6 5 .7-3.6 3.5.9 5L8 12.2l-4.5 2.4.9-5L.8 6.1l5-.7z");
+const FORK = icon("M5 3.3a1.8 1.8 0 1 0-1.5 1.8v1.4c0 1 .8 1.8 1.8 1.8h1.9v1.6a1.8 1.8 0 1 0 1.6 0V8.3h1.9c1 0 1.8-.8 1.8-1.8V5.1a1.8 1.8 0 1 0-1.5 0v1.4c0 .2-.1.3-.3.3H5.3c-.2 0-.3-.1-.3-.3V5.1A1.8 1.8 0 0 0 5 3.3z");
+const PLAY = icon("M5 3.2v9.6L13 8z", 30);
+
 export const TILES = {
   hero: (p) => `<div ${box(p.tone, "paper")}>${label(p.label)}<div class="grow"></div>
     <h1>${esc(p.title)}</h1>${p.lead ? `<p class="lead">${esc(p.lead)}</p>` : ""}
@@ -107,6 +115,22 @@ export const TILES = {
     ${corner(p) || (p.caption ? `<span class="photo-cap">${esc(p.caption)}</span>` : "")}</div>`,
   links: (p) => `<div ${box(p.tone, "paper")}>${label(p.label)}<div class="grow"></div><div class="rows">
     ${(p.items ?? []).map((i) => `<div class="row link-row"><span>${esc(i.name)}</span><span class="mono">${esc(i.value)}</span></div>`).join("")}</div></div>`,
+  // filled from a link by the editor (or the agent): a song, a repository, a video, and bars
+  music: (p) => `<div ${box(p.tone, "ink")}>${p.source ? `<div class="m-src mono">${esc(p.source)}</div>` : ""}${label(p.label)}
+    <div class="music">${p.cover ? `<img class="cover" src="${esc(p.cover)}">` : '<div class="cover"></div>'}
+    <div class="m-text"><b dir="auto">${esc(p.title)}</b>${p.artist ? `<span class="small" dir="auto">${esc(p.artist)}</span>` : ""}</div></div>
+    <div class="grow"></div>${p.duration ? `<div dir="ltr"><div class="m-bar"><i></i></div>
+    <div class="m-time mono"><span>${clock(p.duration * 0.38)}</span><span>${clock(p.duration)}</span></div></div>` : ""}</div>`,
+  repo: (p) => `<div ${box(p.tone, "paper", "", "raised")}>${label(p.label)}<div class="grow"></div>
+    <h3 class="mono repo-name" dir="ltr">${esc(p.repo)}</h3>${p.description ? `<p class="small" style="margin-top:6px" dir="auto">${esc(p.description)}</p>` : ""}
+    <div class="repo-meta" dir="ltr">${p.language ? `<span><i style="background:${HEX.test(p.color ?? "") ? p.color : "var(--accent)"}"></i>${esc(p.language)}</span>` : ""}
+    ${p.stars != null ? `<span>${STAR}${count(p.stars)}</span>` : ""}${p.forks != null ? `<span>${FORK}${count(p.forks)}</span>` : ""}</div></div>`,
+  video: (p) => `<div ${box(p.tone, "paper", "padding:12px 12px 18px", "raised")}>
+    <div class="frame video mask-rounded">${p.thumb ? `<img src="${esc(p.thumb)}">` : ""}<span class="play">${PLAY}</span></div>
+    <div style="padding:14px 8px 0"><h3 dir="auto">${esc(p.title)}</h3>${p.channel ? `<p class="small">${esc(p.channel)}</p>` : ""}</div></div>`,
+  progress: (p) => `<div ${box(p.tone, "paper")}>${label(p.label)}<div class="grow"></div><div class="rows">
+    ${(p.items ?? []).map((i) => `<div><div class="bar-head"><span dir="auto">${esc(i.name)}</span><span class="mono">${pct(i.value)}%</span></div>
+    <div class="bar"><i style="width:${pct(i.value)}%"></i></div></div>`).join("")}</div></div>`,
   contact: (p) => `<div ${box(p.tone, "paper", "padding:20px", "raised")}>${label(p.label, false)}<div class="grow"></div>
     <div class="mono value" style="font-size:${p.value.length > 20 ? 12.5 : 15}px">${esc(p.value)}</div></div>`,
 };
@@ -181,6 +205,20 @@ h2 { font-size: 25px; line-height: 1.3; font-weight: 800; } h3 { font-size: 19px
 .photo-cap { position: absolute; bottom: 16px; inset-inline-start: 16px; background: var(--paper); border-radius: 12px; padding: 6px 12px; font-size: 14px; font-weight: 700; }
 .link-row { justify-content: space-between; font-size: 15px; font-weight: 600; border-bottom: 1px solid var(--sand); padding-bottom: 8px; }
 .link-row:last-child { border-bottom: 0; padding-bottom: 0; } .link-row .mono { font-size: 13px; color: var(--muted); direction: ltr; }
+.music { display: flex; gap: 18px; align-items: center; margin-top: 16px; } .cover { width: 92px; height: 92px; border-radius: 14px; object-fit: cover; flex: none; background: var(--sand); }
+.m-text { display: grid; gap: 2px; min-width: 0; } .m-text b { font-size: 21px; line-height: 1.35; }
+.m-src { position: absolute; top: 24px; inset-inline-end: 26px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; opacity: .6; }
+.m-bar { height: 6px; border-radius: 6px; background: rgba(32,33,31,.12); margin-top: 16px; overflow: hidden; } .m-bar i { display: block; width: 38%; height: 100%; background: var(--accent); }
+.ink .m-bar { background: rgba(255,255,255,.16); }
+.m-time { display: flex; justify-content: space-between; font-size: 12px; margin-top: 6px; opacity: .7; }
+.repo-name { font-size: 20px; overflow-wrap: anywhere; } .repo-meta { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 16px; font-size: 14px; font-weight: 600; }
+.repo-meta span { display: inline-flex; align-items: center; gap: 6px; } .repo-meta i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.frame.video { width: 100%; aspect-ratio: 16 / 9; background: var(--sand); } .frame.video img { object-fit: cover; }
+.play { position: absolute; inset: 0; margin: auto; width: 64px; height: 64px; border-radius: 20px; background: var(--accent); color: var(--ink);
+  display: grid; place-items: center; padding-left: 4px; }
+.bar-head { display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; margin-bottom: 6px; } .bar-head .mono { font-size: 13px; }
+.bar { height: 8px; border-radius: 8px; background: rgba(32,33,31,.1); overflow: hidden; } .bar i { display: block; height: 100%; border-radius: 8px; background: var(--accent); }
+.ink .bar { background: rgba(255,255,255,.16); }
 .l0 { background: var(--sand); } .l1 { background: var(--accent-soft); } .l2 { background: color-mix(in srgb, var(--accent) 55%, white); }
 .l3 { background: var(--accent); } .l4 { background: var(--accent-ink); }${onDark(t)}`;
 }
