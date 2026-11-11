@@ -11,6 +11,13 @@ Persian (right to left). It's the README on [github.com/IsAmirMmd](https://githu
   <img src="docs/preview-fa.png" width="49%" alt="The same layout in Persian, right to left"/>
 </p>
 
+## Arrange it in the editor
+
+[**nim-byte-bento-grid.vercel.app**](https://nim-byte-bento-grid.vercel.app/) lets you arrange the grid by hand: drag tiles
+around, drag their edges to change widths, add any of sixteen kinds of tile, write their text, then copy one prompt
+for your agent. The prompt carries the whole layout as `profile.json` (its `layout` and `blocks` keys). Source:
+[IsAmirMmd/nim-byte-bento-grid](https://github.com/IsAmirMmd/nim-byte-bento-grid).
+
 ## How it works
 
 GitHub strips CSS from READMEs, so the grid is made of images: each tile is drawn from one file,
