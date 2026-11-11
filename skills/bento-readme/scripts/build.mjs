@@ -23,7 +23,9 @@ const profile = JSON.parse(readFileSync(profilePath, "utf8"));
 const local = (src) => (!src || /^(https?|data|file):/.test(src) ? src : pathToFileURL(resolve(bento, src)).href);
 if (profile.image) profile.image = { ...profile.image, src: local(profile.image.src) };
 profile.projects = (profile.projects ?? []).map((p) => ({ ...p, image: local(p.image) }));
-profile.blocks = (profile.blocks ?? []).map((b) => (b.type === "photo" ? { ...b, src: local(b.src) } : b));
+// a photo's src, a song's cover and a video's thumbnail can be pictures in .bento/images too
+const PICS = { photo: "src", music: "cover", video: "thumb" };
+profile.blocks = (profile.blocks ?? []).map((b) => (PICS[b.type] && b[PICS[b.type]] ? { ...b, [PICS[b.type]]: local(b[PICS[b.type]]) } : b));
 const theme = themeOf(profile.theme);
 const dir = dirOf(profile);
 const lang = langOf(profile);

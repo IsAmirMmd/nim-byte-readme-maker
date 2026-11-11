@@ -111,4 +111,4 @@ for a Spotify track, its page's `og:title`, `music:musician_description`, `music
 artist, `thumbnail_url`) and the page's `itemprop="duration"`; for a repository, the GitHub API
 (`/repos/<owner>/<name>`: description, language, stargazers_count, forks_count); for YouTube,
 `https://www.youtube.com/oembed?format=json&url=<link>` and `https://i.ytimg.com/vi/<id>/hqdefault.jpg`.
-Set `href` to the link. Remote covers and thumbnails are fine as URLs: build.mjs loads them.
+Set `href` to the link. Covers and thumbnails can be URLs (build.mjs loads them) or pictures in `.bento/images/` (`images/cover.jpg`), which never break.
