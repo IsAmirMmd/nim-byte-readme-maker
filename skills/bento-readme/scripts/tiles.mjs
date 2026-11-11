@@ -40,6 +40,17 @@ export const TILES = {
     ${p.chips?.length ? `<div style="margin-top:14px">${chips(p.chips)}</div>` : ""}</div>`,
   note: (p) => `<div class="tile ${p.tone ?? "paper"}">${label(p.label)}<div class="grow"></div>
     ${p.title ? `<h3>${esc(p.title)}</h3>` : ""}${p.text ? `<p class="small" style="margin-top:4px">${esc(p.text)}</p>` : ""}</div>`,
+  // the blocks (profile.blocks): tiles anyone can add from the editor's list
+  quote: (p) => `<div class="tile ${p.tone ?? "accent-soft"}"><div class="quote-mark">“</div>
+    <p class="quote">${esc(p.text)}</p><div class="grow"></div>${p.author ? `<p class="small">${esc(p.author)}</p>` : ""}</div>`,
+  chips: (p) => `<div class="tile ${p.tone ?? "paper"}">${label(p.label)}<div class="grow"></div>${chips(p.items ?? [], "sand")}</div>`,
+  number: (p) => `<div class="tile ${p.tone ?? "sand"}">${label(p.label)}<div class="grow"></div>
+    <div class="big-num">${esc(p.value)}</div>${p.text ? `<p class="small">${esc(p.text)}</p>` : ""}</div>`,
+  status: (p) => `<div class="tile ${p.tone ?? "green"}">${label(p.label, false)}<div class="grow"></div>
+    <div class="status"><i></i><b>${esc(p.title)}</b></div>${p.text ? `<p class="small" style="margin-top:4px">${esc(p.text)}</p>` : ""}</div>`,
+  photo: (p) => `<div class="tile photo">${p.src ? `<img src="${esc(p.src)}">` : ""}${p.caption ? `<span class="photo-cap">${esc(p.caption)}</span>` : ""}</div>`,
+  links: (p) => `<div class="tile ${p.tone ?? "paper"}">${label(p.label)}<div class="grow"></div><div class="rows">
+    ${(p.items ?? []).map((i) => `<div class="row link-row"><span>${esc(i.name)}</span><span class="mono">${esc(i.value)}</span></div>`).join("")}</div></div>`,
   contact: (p) => `<div class="tile paper raised" style="padding:20px">${label(p.label, false)}<div class="grow"></div>
     <div class="mono value" style="font-size:${p.value.length > 20 ? 12.5 : 15}px">${esc(p.value)}</div></div>`,
 };
@@ -90,6 +101,15 @@ h2 { font-size: 25px; line-height: 1.3; font-weight: 800; } h3 { font-size: 19px
 .heat { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 13px); gap: 4px; justify-content: space-between; direction: ltr; }
 .heat b, .legend b { width: 13px; height: 13px; border-radius: 3px; display: inline-block; }
 .legend { display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--muted); }
+.quote-mark { font-size: 72px; line-height: .8; font-weight: 900; color: var(--accent); height: 40px; }
+.quote { font-size: 22px; line-height: 1.5; font-weight: 700; margin-top: 8px; }
+.big-num { font-size: 56px; font-weight: 900; line-height: 1.1; letter-spacing: -1px; }
+.status { display: flex; align-items: center; gap: 10px; font-size: 21px; }
+.status i { width: 14px; height: 14px; border-radius: 9999px; background: #2f6b3a; box-shadow: 0 0 0 5px rgba(47,107,58,.18); }
+.tile.photo { padding: 0; background: var(--sand); } .photo img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+.photo-cap { position: absolute; bottom: 16px; inset-inline-start: 16px; background: var(--paper); border-radius: 12px; padding: 6px 12px; font-size: 14px; font-weight: 700; }
+.link-row { justify-content: space-between; font-size: 15px; font-weight: 600; border-bottom: 1px solid var(--sand); padding-bottom: 8px; }
+.link-row:last-child { border-bottom: 0; padding-bottom: 0; } .link-row .mono { font-size: 13px; color: var(--muted); direction: ltr; }
 .l0 { background: var(--sand); } .l1 { background: var(--accent-soft); } .l2 { background: color-mix(in srgb, var(--accent) 55%, white); }
 .l3 { background: var(--accent); } .l4 { background: var(--accent-ink); }`;
 }

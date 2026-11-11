@@ -23,6 +23,7 @@ const profile = JSON.parse(readFileSync(profilePath, "utf8"));
 const local = (src) => (!src || /^(https?|data|file):/.test(src) ? src : pathToFileURL(resolve(bento, src)).href);
 if (profile.image) profile.image = { ...profile.image, src: local(profile.image.src) };
 profile.projects = (profile.projects ?? []).map((p) => ({ ...p, image: local(p.image) }));
+profile.blocks = (profile.blocks ?? []).map((b) => (b.type === "photo" ? { ...b, src: local(b.src) } : b));
 const theme = { ...THEMES.nimbyte, ...(profile.theme ?? {}) };
 const dir = dirOf(profile);
 const lang = langOf(profile);

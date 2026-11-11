@@ -62,8 +62,13 @@ function defaultRows(profile) {
 }
 
 // Free tiles of text (profile.notes): a label, a title and a line, in a tone of the palette.
-const noteTiles = (profile) => (profile.notes ?? []).map((n, k) => ({ id: `note-${k + 1}`, kind: "note", data: n, href: n.href }));
-const MIN = { hero: 300, image: 300, now: 230, feature: 230, contact: 116 };
+const noteTiles = (profile) => [
+  ...(profile.notes ?? []).map((n, k) => ({ id: `note-${k + 1}`, kind: "note", data: n, href: n.href })),
+  // profile.blocks: tiles of any of the extra kinds, each with its "type"
+  ...(profile.blocks ?? []).filter((b) => BLOCKS.includes(b.type)).map((b, k) => ({ id: `block-${k + 1}`, kind: b.type, data: b, href: b.href })),
+];
+export const BLOCKS = ["quote", "chips", "number", "status", "photo", "links"];
+const MIN = { hero: 300, image: 300, now: 230, feature: 230, contact: 116, photo: 230, quote: 200, number: 180, status: 160 };
 
 // Widths that add up to 1000: the ones given keep their share, the rest split what's left.
 export function fit(widths) {
