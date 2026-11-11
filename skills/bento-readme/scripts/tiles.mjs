@@ -38,6 +38,8 @@ export const TILES = {
   education: (p) => `<div class="tile blue">${label(p.label ?? "Education")}<div class="grow"></div>
     <h3>${esc(p.title)}</h3>${p.text ? `<p class="small" style="margin-top:4px">${esc(p.text)}</p>` : ""}
     ${p.chips?.length ? `<div style="margin-top:14px">${chips(p.chips)}</div>` : ""}</div>`,
+  note: (p) => `<div class="tile ${p.tone ?? "paper"}">${label(p.label)}<div class="grow"></div>
+    ${p.title ? `<h3>${esc(p.title)}</h3>` : ""}${p.text ? `<p class="small" style="margin-top:4px">${esc(p.text)}</p>` : ""}</div>`,
   contact: (p) => `<div class="tile paper raised" style="padding:20px">${label(p.label, false)}<div class="grow"></div>
     <div class="mono value" style="font-size:${p.value.length > 20 ? 12.5 : 15}px">${esc(p.value)}</div></div>`,
 };

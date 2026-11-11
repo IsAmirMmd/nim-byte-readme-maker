@@ -19,7 +19,7 @@ const split = (n) => {
   return Array.from({ length: n }, (_, i) => base + (i < 1000 - base * n ? 1 : 0));
 };
 
-export function rows(profile) {
+function defaultRows(profile) {
   const s = STRINGS[langOf(profile)];
   const out = [];
   const row = (tiles, minHeight = 0) => tiles.length && out.push({ tiles, minHeight });
@@ -59,6 +59,37 @@ export function rows(profile) {
     row(contacts.map((c, k) => ({ id: `contact-${k + 1}`, kind: "contact", data: c, width: widths[k], href: c.href })), 116);
   }
   return out;
+}
+
+// Free tiles of text (profile.notes): a label, a title and a line, in a tone of the palette.
+const noteTiles = (profile) => (profile.notes ?? []).map((n, k) => ({ id: `note-${k + 1}`, kind: "note", data: n, href: n.href }));
+const MIN = { hero: 300, image: 300, now: 230, feature: 230, contact: 116 };
+
+// Widths that add up to 1000: the ones given keep their share, the rest split what's left.
+export function fit(widths) {
+  const given = widths.filter((w) => w > 0);
+  const free = widths.length - given.length;
+  const left = Math.max(0, 1000 - given.reduce((a, b) => a + b, 0));
+  let out = widths.map((w) => (w > 0 ? w : free ? left / free || 1000 / widths.length : 0));
+  const sum = out.reduce((a, b) => a + b, 0);
+  out = out.map((w) => Math.round((w * 1000) / sum));
+  out[out.indexOf(Math.max(...out))] += 1000 - out.reduce((a, b) => a + b, 0);
+  return out;
+}
+
+// The rows: profile.layout when it's there (the editor writes it: rows of tile ids, each with an
+// optional width), else the default order. Tiles the layout doesn't name are left out.
+export function rows(profile) {
+  const defaults = defaultRows(profile);
+  const notes = noteTiles(profile);
+  if (!profile.layout?.length) return notes.length ? [...defaults, { tiles: notes.map((t, k, a) => ({ ...t, width: fit(a.map(() => 0))[k] })) }] : defaults;
+  const byId = new Map([...defaults.flatMap((r) => r.tiles), ...notes].map((t) => [t.id, t]));
+  return profile.layout.map((row) => {
+    const entries = row.map((e) => (typeof e === "string" ? { id: e } : e)).filter((e) => byId.has(e.id));
+    const widths = fit(entries.map((e) => e.width ?? 0));
+    const tiles = entries.map((e, k) => ({ ...byId.get(e.id), width: widths[k] }));
+    return { tiles, minHeight: Math.max(0, ...tiles.map((t) => MIN[t.kind] ?? 0)) };
+  }).filter((r) => r.tiles.length);
 }
 
 // The stats tiles (stats.mjs fills them): four counters, then the last year's squares.

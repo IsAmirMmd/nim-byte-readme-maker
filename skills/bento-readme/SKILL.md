@@ -85,6 +85,8 @@ accentSoft, blueSoft, greenSoft. Keep one accent; see the design rules.
 | `experience` | `[{ when, role, where }]` |
 | `education` | `title`, `text`, `chips[]`, `label` |
 | `contacts` | `[{ label, value, href }]`: up to five, one row |
+| `notes` | `[{ label, title, text, tone, href }]`: free tiles of text (ids `note-1`, `note-2`, …) |
+| `layout` | the order and widths: rows of tile ids, each a string or `{ id, width }` (widths on a 1000 scale; missing ones share what's left). Ids: `hero`, `image`, `now`, `feature`, `stack`, `work-N`, `experience`, `education`, `contact-N`, `note-N`. Without it, the default order. The editor site writes it |
 | `theme` | colour overrides |
 
-`tone` (image tile): `accent-soft`, `blue`, `green`, `sand`, `paper`.
+`tone` (image and note tiles): `accent-soft`, `blue`, `green`, `sand`, `paper`.
