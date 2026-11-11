@@ -98,7 +98,9 @@ override either. Keep one accent; see the design rules.
 Pictures (`image`, `projects[]`, `photo` blocks) also take the editor's crop: `fit` (`cover` or
 `contain`), `pos` (`"x% y%"`, the focal point), `zoom` (0.05 to 2, 1 being the picture's own size: below 1 shrinks it in its frame, above 1 enlarges it toward `pos`) and `mask` (`rounded`,
 `square`, `circle`, `arch`). Their `caption` sits below the picture, or in a corner with `capPos`:
-`top-right`, `top-left`, `bottom-right`, `bottom-left`. Without these keys a picture draws as before.
+`top-right`, `top-left`, `bottom-right`, `bottom-left`. `capBg` is the caption's background: `none`,
+or a tone like a tile's (a palette name or `#rrggbb`); without it a caption below the picture has
+none and one in a corner (or on a photo) is `paper`. Without these keys a picture draws as before.
 
 Stats tiles can go anywhere: put `stat-total`, `stat-current`, `stat-longest`, `stat-views` and
 `stat-year` in `layout` rows like any other id. Without them in the layout, the stats rows come last.
