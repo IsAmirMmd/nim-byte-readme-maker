@@ -8,7 +8,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { createRequire } from "node:module";
 import { dirname, join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { TILES, THEMES, css } from "./tiles.mjs";
+import { TILES, css, themeOf } from "./tiles.mjs";
 import { rows as layout, statRows, dirOf, langOf, isStat, statsPlaced } from "./layout.mjs";
 import { statTile, yearTile } from "./stat-tiles.mjs";
 import { bentoBlock, writeReadme } from "./readme.mjs";
@@ -24,7 +24,7 @@ const local = (src) => (!src || /^(https?|data|file):/.test(src) ? src : pathToF
 if (profile.image) profile.image = { ...profile.image, src: local(profile.image.src) };
 profile.projects = (profile.projects ?? []).map((p) => ({ ...p, image: local(p.image) }));
 profile.blocks = (profile.blocks ?? []).map((b) => (b.type === "photo" ? { ...b, src: local(b.src) } : b));
-const theme = { ...THEMES.nimbyte, ...(profile.theme ?? {}) };
+const theme = themeOf(profile.theme);
 const dir = dirOf(profile);
 const lang = langOf(profile);
 const statsPath = join(bento, "stats.json");

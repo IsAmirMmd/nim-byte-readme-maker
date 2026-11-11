@@ -9,6 +9,45 @@ export const THEMES = {
   },
 };
 
+// Ready palettes: five shades each, light to dark, which take the places of sand, accent-soft,
+// accent, accent-ink and ink (theme.palette names one; theme.colors gives your own five).
+export const PALETTES = {
+  nimbyte: ["#ebe3d6", "#fbdcd4", "#fa604e", "#9f3a2b", "#20211f"],
+  purple: ["#efeaf8", "#ddd1f6", "#8b5cf6", "#5b30b5", "#221a33"],
+  blue: ["#e8eef8", "#d2e1fa", "#3b82f6", "#1e4fae", "#152033"],
+  red: ["#f6e9e7", "#f8d3d0", "#e5484d", "#a3262b", "#2b1a1a"],
+  neutral: ["#edeae5", "#e0dcd5", "#8a847c", "#55504a", "#1f1e1c"],
+  green: ["#e6f1e9", "#cde9d6", "#2f9e5c", "#17663a", "#14261b"],
+  yellow: ["#f5efdc", "#f6e6a6", "#e8b10f", "#8a6300", "#2b2512"],
+  orange: ["#f6ebe1", "#fbd9bd", "#f5761a", "#b14a0b", "#2d1c10"],
+  mono: ["#ececec", "#dcdcdc", "#5f5f5f", "#2e2e2e", "#0d0d0d"],
+  pink: ["#f6e9ef", "#f8d2e3", "#e8559a", "#a52463", "#2e1622"],
+};
+const ROLES = ["sand", "accentSoft", "accent", "accentInk", "ink"];
+// The theme for a profile: nimbyte's, then a palette's five shades, then single overrides.
+export function themeOf(theme = {}) {
+  const { palette, colors, ...rest } = theme;
+  const five = colors?.length === 5 ? colors : PALETTES[palette];
+  const shades = five ? Object.fromEntries(ROLES.map((r, k) => [r, five[k]])) : {};
+  return { ...THEMES.nimbyte, ...shades, ...rest };
+}
+
+// A tile's tone: one of the palette's names (paper, sand, accent-soft, accent, accent-ink, ink,
+// blue, green) or any colour as #rrggbb. Dark ones get light text (and a dark-theme variant).
+const HEX = /^#[0-9a-f]{6}$/i;
+const light = (hex) => {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+export const isDark = (tone) => tone === "ink" || tone === "accent-ink" || (HEX.test(tone ?? "") && light(tone) < 0.5);
+const box = (tone, def, style = "", extra = "") => {
+  const t = tone ?? def;
+  const hex = HEX.test(t);
+  const cls = hex ? `tile${isDark(t) ? " ink" : ""} custom` : `tile ${t === "accent-ink" ? "ink accent-ink" : t}`;
+  const css = (hex ? `background:${t};` : "") + style;
+  return `class="${cls}${extra ? ` ${extra}` : ""}"${css ? ` style="${css}"` : ""}`;
+};
+
 const esc = (s = "") => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const chips = (items = [], tone = "") => `<div class="chips">${items.map((c) => `<span class="chip ${tone}">${esc(c)}</span>`).join("")}</div>`;
 const label = (text, dot = true) => (text ? `<div class="label">${dot ? "<i></i>" : ""}${esc(text)}</div>` : "");
@@ -23,45 +62,45 @@ const frame = (src, p, cls, fit) => `<div class="frame ${cls} mask-${p.mask ?? "
 const corner = (p) => (p.caption && CORNERS.includes(p.capPos) ? `<span class="cap-chip ${p.capPos}">${esc(p.caption)}</span>` : "");
 
 export const TILES = {
-  hero: (p) => `<div class="tile paper">${label(p.label)}<div class="grow"></div>
+  hero: (p) => `<div ${box(p.tone, "paper")}>${label(p.label)}<div class="grow"></div>
     <h1>${esc(p.title)}</h1>${p.lead ? `<p class="lead">${esc(p.lead)}</p>` : ""}
     ${p.chips?.length ? `<div style="margin-top:18px">${chips(p.chips, "sand")}</div>` : ""}</div>`,
-  image: (p) => `<div class="tile ${p.tone ?? "accent-soft"}" style="align-items:center">
+  image: (p) => `<div ${box(p.tone, "accent-soft", "align-items:center")}>
     ${edited(p) ? frame(p.src, p, "pic", "contain") : `<img class="picture" src="${esc(p.src)}">`}<div class="grow"></div>
     ${corner(p) || (p.caption ? `<p class="small" style="color:var(--ink)">${esc(p.caption)}</p>` : "")}</div>`,
-  now: (p) => `<div class="tile ink">${label(p.label)}<h2 style="margin-top:12px">${esc(p.title)}</h2>
+  now: (p) => `<div ${box(p.tone, "ink")}>${label(p.label)}<h2 style="margin-top:12px">${esc(p.title)}</h2>
     ${p.meta ? `<p class="small" style="margin-top:2px">${esc(p.meta)}</p>` : ""}<div class="grow"></div>
     ${p.text ? `<p class="small" style="margin-top:14px">${esc(p.text)}</p>` : ""}</div>`,
-  feature: (p) => `<div class="tile accent raised">${p.href ? '<div class="arrow">↗</div>' : ""}
+  feature: (p) => `<div ${box(p.tone, "accent", "", "raised")}>${p.href ? '<div class="arrow">↗</div>' : ""}
     ${label(p.label, false)}<div class="feature-title"><span dir="${p.titleDir ?? "auto"}">${esc(p.title)}</span>
     ${p.subtitle ? `<span class="mono sub">${esc(p.subtitle)}</span>` : ""}</div><div class="grow"></div>
     ${p.text ? `<p class="small" style="color:var(--ink)">${esc(p.text)}</p>` : ""}${p.chips?.length ? chips(p.chips) : ""}</div>`,
   stack: (groups, t) => `<div class="tile sand">${label(t.label ?? "Stack")}<div class="grow"></div><div class="rows">
     ${groups.map((g) => `<div class="row"><span class="when">${esc(g.group)}</span>${chips(g.items, "tight")}</div>`).join("")}</div></div>`,
-  project: (p) => `<div class="tile paper raised" style="padding:12px 12px 18px">
+  project: (p) => `<div ${box(p.tone, "paper", "padding:12px 12px 18px", "raised")}>
     ${p.image ? (edited(p) ? frame(p.image, p, "shot-frame", "cover") : `<img class="shot" src="${esc(p.image)}">`) : ""}<div style="padding:14px 8px 0">
     <h3>${esc(p.title)}</h3>${p.text ? `<p class="small">${esc(p.text)}</p>` : ""}</div></div>`,
   experience: (list, t) => `<div class="tile paper">${label(t.label ?? "Experience")}<div class="grow"></div><div class="rows">
     ${list.map((e) => `<div class="row"><span class="when">${esc(e.when)}</span><span><b>${esc(e.role)}</b>
     ${e.where ? `<span class="small"> · ${esc(e.where)}</span>` : ""}</span></div>`).join("")}</div></div>`,
-  education: (p) => `<div class="tile blue">${label(p.label ?? "Education")}<div class="grow"></div>
+  education: (p) => `<div ${box(p.tone, "blue")}>${label(p.label ?? "Education")}<div class="grow"></div>
     <h3>${esc(p.title)}</h3>${p.text ? `<p class="small" style="margin-top:4px">${esc(p.text)}</p>` : ""}
     ${p.chips?.length ? `<div style="margin-top:14px">${chips(p.chips)}</div>` : ""}</div>`,
-  note: (p) => `<div class="tile ${p.tone ?? "paper"}">${label(p.label)}<div class="grow"></div>
+  note: (p) => `<div ${box(p.tone, "paper")}>${label(p.label)}<div class="grow"></div>
     ${p.title ? `<h3>${esc(p.title)}</h3>` : ""}${p.text ? `<p class="small" style="margin-top:4px">${esc(p.text)}</p>` : ""}</div>`,
   // the blocks (profile.blocks): tiles anyone can add from the editor's list
-  quote: (p) => `<div class="tile ${p.tone ?? "accent-soft"}"><div class="quote-mark">“</div>
+  quote: (p) => `<div ${box(p.tone, "accent-soft")}><div class="quote-mark">“</div>
     <p class="quote">${esc(p.text)}</p><div class="grow"></div>${p.author ? `<p class="small">${esc(p.author)}</p>` : ""}</div>`,
-  chips: (p) => `<div class="tile ${p.tone ?? "paper"}">${label(p.label)}<div class="grow"></div>${chips(p.items ?? [], "sand")}</div>`,
-  number: (p) => `<div class="tile ${p.tone ?? "sand"}">${label(p.label)}<div class="grow"></div>
+  chips: (p) => `<div ${box(p.tone, "paper")}>${label(p.label)}<div class="grow"></div>${chips(p.items ?? [], "sand")}</div>`,
+  number: (p) => `<div ${box(p.tone, "sand")}>${label(p.label)}<div class="grow"></div>
     <div class="big-num">${esc(p.value)}</div>${p.text ? `<p class="small">${esc(p.text)}</p>` : ""}</div>`,
-  status: (p) => `<div class="tile ${p.tone ?? "green"}">${label(p.label, false)}<div class="grow"></div>
+  status: (p) => `<div ${box(p.tone, "green")}>${label(p.label, false)}<div class="grow"></div>
     <div class="status"><i></i><b>${esc(p.title)}</b></div>${p.text ? `<p class="small" style="margin-top:4px">${esc(p.text)}</p>` : ""}</div>`,
   photo: (p) => `<div class="tile photo">${p.src ? `<img src="${esc(p.src)}"${edited(p) ? ` style="${crop(p, "cover")}"` : ""}>` : ""}
     ${corner(p) || (p.caption ? `<span class="photo-cap">${esc(p.caption)}</span>` : "")}</div>`,
-  links: (p) => `<div class="tile ${p.tone ?? "paper"}">${label(p.label)}<div class="grow"></div><div class="rows">
+  links: (p) => `<div ${box(p.tone, "paper")}>${label(p.label)}<div class="grow"></div><div class="rows">
     ${(p.items ?? []).map((i) => `<div class="row link-row"><span>${esc(i.name)}</span><span class="mono">${esc(i.value)}</span></div>`).join("")}</div></div>`,
-  contact: (p) => `<div class="tile paper raised" style="padding:20px">${label(p.label, false)}<div class="grow"></div>
+  contact: (p) => `<div ${box(p.tone, "paper", "padding:20px", "raised")}>${label(p.label, false)}<div class="grow"></div>
     <div class="mono value" style="font-size:${p.value.length > 20 ? 12.5 : 15}px">${esc(p.value)}</div></div>`,
 };
 
@@ -79,7 +118,7 @@ body { background: transparent; font-family: Vazirmatn, sans-serif; color: var(-
 .tile { flex: 1; border-radius: 24px; padding: 26px 28px; position: relative; display: flex; flex-direction: column; overflow: hidden; }
 .paper { background: var(--paper); } .sand { background: var(--sand); } .accent { background: var(--accent); }
 .accent-soft { background: var(--accent-soft); } .blue { background: var(--blue-soft); } .green { background: var(--green-soft); }
-.ink { background: var(--ink); color: var(--cream); } .ink.dark { box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.16); }
+.ink { background: var(--ink); color: var(--cream); } .accent-ink { background: var(--accent-ink); } .ink.dark { box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.16); }
 .raised { box-shadow: 0 1px 2px rgba(32,33,31,.05), 0 3px 6px rgba(32,33,31,.05); }
 .mono { font-family: JBM, monospace; }
 .label { font-family: JBM, monospace; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
@@ -91,6 +130,7 @@ h1 { font-size: 46px; line-height: 1.18; font-weight: 900; letter-spacing: -.5px
 h2 { font-size: 25px; line-height: 1.3; font-weight: 800; } h3 { font-size: 19px; line-height: 1.35; font-weight: 700; }
 .lead { font-size: 19px; line-height: 1.6; font-weight: 500; color: var(--muted); margin-top: 12px; }
 .small { font-size: 15px; line-height: 1.55; color: var(--muted); } .ink .small { color: rgba(255,255,255,.72); }
+.ink .lead, .ink .when, .ink .unit, .ink .link-row .mono { color: rgba(255,255,255,.72); } .ink .chip { color: var(--ink); }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { font-size: 14px; font-weight: 600; padding: 6px 12px; border-radius: 12px; background: var(--paper); }
 .chip.sand { background: var(--sand); } .chip.tight { font-size: 13px; padding: 4px 10px; }

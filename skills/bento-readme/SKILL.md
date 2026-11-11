@@ -66,8 +66,11 @@ after a copy is saved to `.bento/README.before-bento.md`.
 ## Updating later
 
 Edit `.bento/profile.json` (or ask the agent to), build, preview, push. To change the colours,
-add a `"theme"` object with any of: ink, muted, cream, sand, paper, accent, accentInk,
-accentSoft, blueSoft, greenSoft. Keep one accent; see the design rules.
+add a `"theme"` object: `"palette"` names a ready one (`nimbyte`, the default, `purple`, `blue`,
+`red`, `neutral`, `green`, `yellow`, `orange`, `mono`, `pink`), or `"colors"` gives your own five
+shades, light to dark (they take the places of sand, accentSoft, accent, accentInk and ink);
+single keys (ink, muted, cream, sand, paper, accent, accentInk, accentSoft, blueSoft, greenSoft)
+override either. Keep one accent; see the design rules.
 
 ## profile.json
 
@@ -88,9 +91,9 @@ accentSoft, blueSoft, greenSoft. Keep one accent; see the design rules.
 | `notes` | `[{ label, title, text, tone, href }]`: free tiles of text (ids `note-1`, `note-2`, …) |
 | `blocks` | `[{ type, … }]`: extra tiles (ids `block-1`, `block-2`, …), `type` one of: `quote` (text, author), `chips` (label, items[]), `number` (label, value, text), `status` (label, title, text), `photo` (src, caption: an image filling the tile), `links` (label, items[{name, value}]); each takes `tone` and `href` |
 | `layout` | the order and widths: rows of tile ids, each a string or `{ id, width }` (widths on a 1000 scale; missing ones share what's left). Ids: `hero`, `image`, `now`, `feature`, `stack`, `work-N`, `experience`, `education`, `contact-N`, `note-N`, `block-N`. Without it, the default order. The editor site writes it |
-| `theme` | colour overrides |
+| `theme` | `palette` (a ready one), `colors` (your five shades) and single colour overrides |
 
-`tone` (image and note tiles): `accent-soft`, `blue`, `green`, `sand`, `paper`.
+`tone` (every tile but `stack`, `experience`, `photo` and the stats): `paper`, `sand`, `accent-soft`, `accent`, `accent-ink`, `ink`, `blue`, `green`, or any colour as `#rrggbb`. Dark tones get light text and, like `now`, a variant for GitHub's dark theme.
 
 Pictures (`image`, `projects[]`, `photo` blocks) also take the editor's crop: `fit` (`cover` or
 `contain`), `pos` (`"x% y%"`, the focal point), `zoom` (1 to 3, toward `pos`) and `mask` (`rounded`,
