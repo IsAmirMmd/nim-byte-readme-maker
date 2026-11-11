@@ -4,14 +4,14 @@
 // never shows an old picture; older v folders are removed), and the stats tiles too when
 // .bento/stats.json exists. With --stats: only the stats tiles, into assets/bento/stats/ (the
 // workflow's daily run). Needs Playwright with Chromium (npm i --no-save playwright).
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { TILES, css, themeOf } from "./tiles.mjs";
 import { rows as layout, statRows, dirOf, langOf, isStat, statsPlaced } from "./layout.mjs";
 import { statTile, yearTile } from "./stat-tiles.mjs";
-import { bentoBlock, writeReadme } from "./readme.mjs";
+import { bentoBlock, hasBlock, withBlock } from "./readme.mjs";
 
 const args = process.argv.slice(2);
 const profilePath = resolve(args.find((a) => !a.startsWith("--")) ?? ".bento/profile.json");
@@ -97,3 +97,10 @@ if (folder && !args.includes("--no-readme")) {
   writeReadme(join(repo, "README.md"), block, join(bento, "README.before-bento.md"));
 }
 console.log(`${statsOnly ? "stats tiles" : "tiles"}: ${folder ? relative(repo, folder) : "-"}${stats ? ` and ${relative(repo, statsFolder)}` : ""}; README.md updated`);
+
+// Puts the block in README.md: between the markers, or as a new README (keeping a copy of the old one).
+function writeReadme(path, block, backup) {
+  const old = existsSync(path) ? readFileSync(path, "utf8") : null;
+  if (old !== null && !hasBlock(old)) copyFileSync(path, backup);
+  writeFileSync(path, withBlock(old, block));
+}

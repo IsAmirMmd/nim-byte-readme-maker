@@ -1,7 +1,7 @@
 // Writes the tiles into README.md. GitHub strips CSS from READMEs, so the grid is images set side
 // by side: no whitespace between them (it would add gaps), align="top" (no baseline gap under a
 // row), widths as percentages of the 1000px design that add up to just under 100%.
-import { existsSync, readFileSync, writeFileSync, copyFileSync } from "node:fs";
+// No Node APIs here, so the editor site can use it too; build.mjs writes the file.
 
 export const START = "<!-- bento:start -->";
 export const END = "<!-- bento:end -->";
@@ -32,14 +32,6 @@ export function bentoBlock({ rows, dir, folder, statRows, statsFolder, github })
   return `${html}${END}`;
 }
 
-// Replaces the block between the markers, or makes a README of it (keeping a copy of the old one).
-export function writeReadme(path, block, backup) {
-  if (existsSync(path)) {
-    const old = readFileSync(path, "utf8");
-    const a = old.indexOf(START);
-    const b = old.indexOf(END);
-    if (a >= 0 && b > a) return writeFileSync(path, old.slice(0, a) + block + old.slice(b + END.length));
-    copyFileSync(path, backup);
-  }
-  writeFileSync(path, `${block}\n`);
-}
+// The README with the block in it: the block between the markers replaced, or the block alone.
+export const hasBlock = (old) => old != null && old.indexOf(START) >= 0 && old.indexOf(END) > old.indexOf(START);
+export const withBlock = (old, block) => (hasBlock(old) ? old.slice(0, old.indexOf(START)) + block + old.slice(old.indexOf(END) + END.length) : `${block}\n`);
