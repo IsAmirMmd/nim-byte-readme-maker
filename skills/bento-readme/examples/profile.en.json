@@ -1,0 +1,45 @@
+{
+  "github": "your-username",
+  "lang": "en",
+  "stats": true,
+  "hero": {
+    "label": "github.com/your-username",
+    "title": "Hi! I'm Your Name.",
+    "lead": "Front-End developer. I build websites, dashboards and bots with Next.js, React and TypeScript.",
+    "chips": ["Remote since 2023", "Open source", "Coffee first"]
+  },
+  "image": { "src": "images/me.png", "caption": "That's me", "tone": "accent-soft" },
+  "now": {
+    "label": "Now",
+    "title": "Front-End Developer",
+    "meta": "Company · remote · 2024–now",
+    "text": "Building data-heavy dashboards with React and D3.js."
+  },
+  "feature": {
+    "label": "my studio",
+    "title": "Studio Name",
+    "subtitle": "studio.dev",
+    "href": "https://studio.dev",
+    "chips": ["Websites", "Dashboards", "Telegram bots"]
+  },
+  "stack": [
+    { "group": "Languages", "items": ["TypeScript", "JavaScript", "HTML", "CSS"] },
+    { "group": "Frameworks", "items": ["React", "Next.js", "Tailwind CSS"] },
+    { "group": "Tools", "items": ["Git", "Figma", "Vercel"] }
+  ],
+  "projects": [
+    { "title": "Project One", "text": "What it is, in one line", "image": "images/project-1.png", "href": "https://example.com" },
+    { "title": "Project Two", "text": "What it is, in one line", "image": "images/project-2.png", "href": "https://example.com" },
+    { "title": "Project Three", "text": "What it is, in one line", "image": "images/project-3.png", "href": "https://example.com" }
+  ],
+  "experience": [
+    { "when": "2024–now", "role": "Front-End Developer", "where": "Company, remote" },
+    { "when": "2022–2024", "role": "Junior Developer", "where": "Another Company" }
+  ],
+  "education": { "title": "B.Sc. Computer Engineering", "text": "University Name, 2020–2024", "chips": ["TA, Web Programming"] },
+  "contacts": [
+    { "label": "Email", "value": "you@example.com", "href": "mailto:you@example.com" },
+    { "label": "LinkedIn", "value": "in/your-username", "href": "https://linkedin.com/in/your-username" },
+    { "label": "Telegram", "value": "@your_handle", "href": "https://t.me/your_handle" }
+  ]
+}

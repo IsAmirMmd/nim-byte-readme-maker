@@ -1,0 +1,45 @@
+{
+  "github": "your-username",
+  "lang": "fa",
+  "stats": true,
+  "hero": {
+    "label": "github.com/your-username",
+    "title": "سلام! من اسم شما هستم.",
+    "lead": "برنامه‌نویس Front-End. با Next.js، React و TypeScript سایت، داشبورد و ربات تلگرام می‌سازم.",
+    "chips": ["دورکاری از ۱۴۰۲", "متن‌باز", "اول قهوه"]
+  },
+  "image": { "src": "images/me.png", "caption": "این منم", "tone": "accent-soft" },
+  "now": {
+    "label": "الان",
+    "title": "برنامه‌نویس Front-End",
+    "meta": "اسم شرکت · دورکاری · از ۱۴۰۳",
+    "text": "داشبوردهای پرداده با React و D3.js می‌سازم."
+  },
+  "feature": {
+    "label": "استودیوی من",
+    "title": "اسم استودیو",
+    "subtitle": "studio.ir",
+    "href": "https://studio.ir",
+    "chips": ["سایت", "داشبورد", "ربات تلگرام"]
+  },
+  "stack": [
+    { "group": "زبان‌ها", "items": ["TypeScript", "JavaScript", "HTML", "CSS"] },
+    { "group": "فریم‌ورک‌ها", "items": ["React", "Next.js", "Tailwind CSS"] },
+    { "group": "ابزارها", "items": ["Git", "Figma", "Vercel"] }
+  ],
+  "projects": [
+    { "title": "پروژه‌ی اول", "text": "در یک خط: چیست", "image": "images/project-1.png", "href": "https://example.com" },
+    { "title": "پروژه‌ی دوم", "text": "در یک خط: چیست", "image": "images/project-2.png", "href": "https://example.com" },
+    { "title": "پروژه‌ی سوم", "text": "در یک خط: چیست", "image": "images/project-3.png", "href": "https://example.com" }
+  ],
+  "experience": [
+    { "when": "۱۴۰۳ تا الان", "role": "برنامه‌نویس Front-End", "where": "اسم شرکت، دورکاری" },
+    { "when": "۱۴۰۱ تا ۱۴۰۳", "role": "برنامه‌نویس جونیور", "where": "شرکت دیگر" }
+  ],
+  "education": { "title": "کارشناسی مهندسی کامپیوتر", "text": "اسم دانشگاه، از ۱۴۰۱", "chips": ["دستیار آموزشی برنامه‌نویسی وب"] },
+  "contacts": [
+    { "label": "ایمیل", "value": "you@example.com", "href": "mailto:you@example.com" },
+    { "label": "لینکدین", "value": "in/your-username", "href": "https://linkedin.com/in/your-username" },
+    { "label": "تلگرام", "value": "@your_handle", "href": "https://t.me/your_handle" }
+  ]
+}
